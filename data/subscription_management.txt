@@ -1,0 +1,9 @@
+Subscription Management
+
+Customers can upgrade, downgrade, or cancel subscriptions from the Account Settings page.
+
+Subscription changes take effect immediately unless otherwise specified.
+
+Cancelled subscriptions remain active until the end of the current billing cycle.
+
+Billing adjustments may apply during plan changes.

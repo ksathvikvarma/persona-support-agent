@@ -1,0 +1,11 @@
+Dashboard Access Issues
+
+If users cannot access the dashboard:
+
+1. Verify that the user account is active.
+2. Confirm the user's subscription is valid.
+3. Clear browser cache and cookies.
+4. Try accessing the dashboard from an incognito window.
+5. Ensure JavaScript is enabled.
+
+If the issue persists, collect browser console logs and contact support.

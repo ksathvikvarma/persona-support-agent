@@ -1,0 +1,11 @@
+Billing Policy
+
+Invoices are generated automatically at the beginning of each billing cycle.
+
+Payment failures trigger automated retry attempts.
+
+Customers are notified of failed payments by email.
+
+Billing disputes are reviewed within five business days.
+
+Contact support for billing-related concerns.

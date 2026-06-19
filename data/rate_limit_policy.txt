@@ -1,0 +1,12 @@
+API Rate Limit Policy
+
+API requests are subject to rate limiting.
+
+Default limits:
+
+- 100 requests per minute
+- 5000 requests per hour
+
+When limits are exceeded, the API returns HTTP status code 429.
+
+Users should implement retry mechanisms with exponential backoff to handle rate limiting gracefully.

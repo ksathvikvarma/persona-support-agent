@@ -1,0 +1,9 @@
+Account Lockout Guide
+
+To protect customer accounts, the system automatically locks an account after five consecutive failed login attempts.
+
+Locked accounts remain inaccessible for 15 minutes.
+
+Users may also unlock their account by using the "Forgot Password" option and successfully resetting their password.
+
+If the account remains locked after the waiting period, contact customer support for manual verification.

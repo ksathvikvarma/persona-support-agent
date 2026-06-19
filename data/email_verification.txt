@@ -1,0 +1,12 @@
+Email Verification Guide
+
+After registration, a verification email is automatically sent.
+
+If the email is not received:
+
+1. Check the spam or junk folder.
+2. Verify the registered email address.
+3. Wait up to 10 minutes for delivery.
+4. Request a new verification email.
+
+Verification links expire after 24 hours.
