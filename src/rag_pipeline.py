@@ -1,6 +1,6 @@
 import os
 from pypdf import PdfReader
-
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 def load_documents(data_folder="data"):
     documents = []
@@ -45,17 +45,44 @@ def load_documents(data_folder="data"):
 
     return documents
 
+def chunk_documents(documents):
+
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=300,
+        chunk_overlap=50
+    )
+
+    all_chunks = []
+
+    for doc in documents:
+
+        chunks = splitter.split_text(doc["content"])
+
+        for index, chunk in enumerate(chunks):
+
+            all_chunks.append(
+                {
+                    "text": chunk,
+                    "source": doc["source"],
+                    "chunk_index": index
+                }
+            )
+
+    return all_chunks
 
 if __name__ == "__main__":
 
     docs = load_documents()
 
-    print(f"\nLoaded {len(docs)} documents\n")
+    chunks = chunk_documents(docs)
 
-    for doc in docs:
+    print(f"\nTotal Chunks: {len(chunks)}\n")
+
+    for chunk in chunks[:5]:
 
         print("=" * 60)
-        print("SOURCE:", doc["source"])
+        print("SOURCE:", chunk["source"])
+        print("CHUNK:", chunk["chunk_index"])
         print()
-        print(doc["content"][:300])
+        print(chunk["text"])
         print()
