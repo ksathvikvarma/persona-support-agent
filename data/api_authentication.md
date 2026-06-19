@@ -6,3 +6,13 @@ If you receive a 401 Unauthorized error:
 2. Check Bearer token format.
 3. Ensure the token has not expired.
 4. Confirm required headers are present.
+
+Required Header Example:
+
+Authorization: Bearer YOUR_API_TOKEN
+
+Common Causes:
+
+- Invalid API key
+- Expired token
+- Missing authorization header

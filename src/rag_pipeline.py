@@ -1,6 +1,10 @@
 import os
-from pypdf import PdfReader
+
+import chromadb
+from dotenv import load_dotenv
+from google import genai
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from pypdf import PdfReader
 
 def load_documents(data_folder="data"):
     documents = []
@@ -70,19 +74,98 @@ def chunk_documents(documents):
 
     return all_chunks
 
+load_dotenv()
+
+client = genai.Client(
+    api_key=os.getenv("GEMINI_API_KEY")
+)
+
+def get_embedding(text):
+    response = client.models.embed_content(
+        model="gemini-embedding-001",
+        contents=text
+    )
+
+    return response.embeddings[0].values
+
+def create_vector_db(chunks):
+
+    chroma_client = chromadb.PersistentClient(
+        path="chroma_db"
+    )
+
+    try:
+        chroma_client.delete_collection("support_kb")
+    except:
+        pass
+
+    collection = chroma_client.get_or_create_collection(
+        name="support_kb"
+    )
+
+    for i, chunk in enumerate(chunks):
+
+        embedding = get_embedding(chunk["text"])
+
+        collection.add(
+            ids=[str(i)],
+            embeddings=[embedding],
+            documents=[chunk["text"]],
+            metadatas=[
+                {
+                    "source": chunk["source"],
+                    "chunk_index": chunk["chunk_index"]
+                }
+            ]
+        )
+
+    return collection
+
+def retrieve_documents(query, collection, top_k=3):
+
+    query_embedding = get_embedding(query)
+
+    results = collection.query(
+        query_embeddings=[query_embedding],
+        n_results=top_k
+    )
+
+    return results
+
+# if __name__ == "__main__":
+
+#     docs = load_documents()
+
+#     chunks = chunk_documents(docs)
+
+#     print(f"\nTotal Chunks: {len(chunks)}\n")
+
+#     for chunk in chunks[:5]:
+
+#         print("=" * 60)
+#         print("SOURCE:", chunk["source"])
+#         print("CHUNK:", chunk["chunk_index"])
+#         print()
+#         print(chunk["text"])
+#         print()
+
 if __name__ == "__main__":
 
     docs = load_documents()
 
     chunks = chunk_documents(docs)
 
-    print(f"\nTotal Chunks: {len(chunks)}\n")
+    collection = create_vector_db(chunks)
 
-    for chunk in chunks[:5]:
+    results = retrieve_documents(
+        "How do I reset my password?",
+        collection
+    )
 
-        print("=" * 60)
-        print("SOURCE:", chunk["source"])
-        print("CHUNK:", chunk["chunk_index"])
-        print()
-        print(chunk["text"])
+    print("\nRETRIEVED RESULTS\n")
+
+    for doc in results["documents"][0]:
+
+        print("=" * 50)
+        print(doc)
         print()
