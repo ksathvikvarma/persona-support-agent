@@ -10,100 +10,112 @@ from rag_pipeline import (
     retrieve_documents
 )
 
-collection = get_collection()
-conversation_history = []
 
-print("\nPersona Support Agent Started")
-print("Type 'exit' to quit.\n")
+def main():
+    """
+    Run the Persona Support Agent workflow,
+    including classification, retrieval,
+    response generation, and escalation.
+    """
 
-while True:
+    collection = get_collection()
+    conversation_history = []
 
-    user_message = input("You: ")
+    print("\nPersona Support Agent Started")
+    print("Type 'exit' to quit.\n")
 
-    if user_message.lower() == "exit":
-        break
+    while True:
 
-    # Persona Detection
-    persona_result = classify_persona(user_message)
-    persona = persona_result["persona"]
+        user_message = input("You: ")
 
-    # Retrieval
-    retrieval_results = retrieve_documents(
-        user_message,
-        collection
-    )
+        if user_message.lower() == "exit":
+            break
 
-    retrieved_chunks = retrieval_results["documents"][0]
-    
-    conversation_history.append(user_message)
+        # Persona Detection
+        persona_result = classify_persona(user_message)
+        persona = persona_result["persona"]
 
-    escalation_result = should_escalate(
-        user_message,
-        retrieved_chunks
-    )
-
-    # Response Generation
-    if escalation_result["escalate"]:
-
-        sources = [
-            metadata["source"]
-            for metadata in retrieval_results["metadatas"][0]
-        ]
-
-        summary = generate_handoff_summary(
-            persona=persona,
-            user_message=user_message,
-            conversation_history=conversation_history,
-            sources=sources,
-            escalation_reasons=escalation_result["reasons"]
+        # Retrieval
+        retrieval_results = retrieve_documents(
+            user_message,
+            collection
         )
 
-        print("\n" + "=" * 60)
+        retrieved_chunks = retrieval_results["documents"][0]
 
-        print("ESCALATION REQUIRED")
+        conversation_history.append(user_message)
 
-        print("\nREASONS:")
+        escalation_result = should_escalate(
+            user_message,
+            retrieved_chunks
+        )
 
-        for reason in escalation_result["reasons"]:
-            print("-", reason)
+        # Response Generation
+        if escalation_result["escalate"]:
 
-        print("\nHANDOFF SUMMARY:")
+            sources = [
+                metadata["source"]
+                for metadata in retrieval_results["metadatas"][0]
+            ]
 
-        print(
-            json.dumps(
-                summary,
-                indent=4
+            summary = generate_handoff_summary(
+                persona=persona,
+                user_message=user_message,
+                conversation_history=conversation_history,
+                sources=sources,
+                escalation_reasons=escalation_result["reasons"]
             )
-        )
 
-        print("=" * 60)
+            print("\n" + "=" * 60)
 
-    else:
+            print("ESCALATION REQUIRED")
 
-        response = generate_response(
-            user_message=user_message,
-            persona=persona,
-            retrieved_chunks=retrieved_chunks
-        )
+            print("\nREASONS:")
 
-        print("\n" + "=" * 60)
+            for reason in escalation_result["reasons"]:
+                print("-", reason)
 
-        print("PERSONA:")
-        print(persona)
+            print("\nHANDOFF SUMMARY:")
 
-        print("\nSOURCES:")
+            print(
+                json.dumps(
+                    summary,
+                    indent=4
+                )
+            )
 
-        seen_sources = set()
+            print("=" * 60)
 
-        for metadata in retrieval_results["metadatas"][0]:
+        else:
 
-            source = metadata["source"]
+            response = generate_response(
+                user_message=user_message,
+                persona=persona,
+                retrieved_chunks=retrieved_chunks
+            )
 
-            if source not in seen_sources:
-                print("-", source)
-                seen_sources.add(source)
+            print("\n" + "=" * 60)
 
-        print("\nRESPONSE:")
-        print(response)
+            print("PERSONA:")
+            print(persona)
 
-        print("=" * 60)
+            print("\nSOURCES:")
+
+            seen_sources = set()
+
+            for metadata in retrieval_results["metadatas"][0]:
+
+                source = metadata["source"]
+
+                if source not in seen_sources:
+                    print("-", source)
+                    seen_sources.add(source)
+
+            print("\nRESPONSE:")
+            print(response)
+
+            print("=" * 60)
+
+
+if __name__ == "__main__":
+    main()

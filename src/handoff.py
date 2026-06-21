@@ -5,6 +5,10 @@ def generate_handoff_summary(
     sources,
     escalation_reasons
 ):
+    """
+    Generate a structured handoff summary for
+    human-agent escalation.
+    """
 
     summary = {
         "persona": persona,

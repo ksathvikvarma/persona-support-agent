@@ -15,7 +15,7 @@ if not api_key:
 
 client = genai.Client(api_key=api_key)
 
-response_schema = {
+RESPONSE_SCHEMA  = {
     "type": "OBJECT",
     "properties": {
         "persona": {
@@ -73,7 +73,7 @@ Customer Message:
             contents=prompt,
             config=types.GenerateContentConfig(
                 response_mime_type="application/json",
-                response_schema=response_schema,
+                response_schema=RESPONSE_SCHEMA ,
                 temperature=0.1
             )
         )

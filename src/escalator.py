@@ -4,6 +4,10 @@ def should_escalate(
     user_message,
     retrieved_chunks
 ):
+    """
+    Determine whether a conversation should be
+    escalated to a human support agent.
+    """
     
     escalation_reasons = []
 
@@ -13,12 +17,10 @@ def should_escalate(
             "No relevant information found."
         )
 
-    # Sensitive topics
-    sensitive_keywords = ESCALATION_KEYWORDS
 
     user_message_lower = user_message.lower()
 
-    for keyword in sensitive_keywords:
+    for keyword in ESCALATION_KEYWORDS:
 
         if keyword in user_message_lower:
 

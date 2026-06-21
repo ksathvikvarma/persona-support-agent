@@ -6,10 +6,22 @@ from google import genai
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from pypdf import PdfReader
 
-from config import (CHUNK_SIZE, CHUNK_OVERLAP,COLLECTION_NAME,CHROMA_DB_PATH,TOP_K_RESULTS,EMBEDDING_MODEL)
-    
+from config import (
+    CHUNK_SIZE,
+    CHUNK_OVERLAP,
+    COLLECTION_NAME,
+    CHROMA_DB_PATH,
+    TOP_K_RESULTS,
+    EMBEDDING_MODEL
+)
+
 
 def load_documents(data_folder="data"):
+    """
+    Load TXT, Markdown, and PDF documents
+    from the knowledge base directory.
+    """
+
     documents = []
 
     for filename in os.listdir(data_folder):
@@ -52,7 +64,12 @@ def load_documents(data_folder="data"):
 
     return documents
 
+
 def chunk_documents(documents):
+    """
+    Split documents into smaller chunks
+    for embedding and retrieval.
+    """
 
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=CHUNK_SIZE,
@@ -77,13 +94,20 @@ def chunk_documents(documents):
 
     return all_chunks
 
+
 load_dotenv()
 
 client = genai.Client(
     api_key=os.getenv("GEMINI_API_KEY")
 )
 
+
 def get_embedding(text):
+    """
+    Generate vector embeddings for text
+    using the Gemini embedding model.
+    """
+
     response = client.models.embed_content(
         model=EMBEDDING_MODEL,
         contents=text
@@ -91,7 +115,12 @@ def get_embedding(text):
 
     return response.embeddings[0].values
 
+
 def create_vector_db(chunks):
+    """
+    Create and populate a ChromaDB collection
+    with document embeddings.
+    """
 
     chroma_client = chromadb.PersistentClient(
         path=CHROMA_DB_PATH
@@ -124,19 +153,48 @@ def create_vector_db(chunks):
 
     return collection
 
+
 def get_collection():
+    """
+    Load an existing collection or create
+    a new vector database if none exists.
+    """
 
     chroma_client = chromadb.PersistentClient(
         path=CHROMA_DB_PATH
     )
 
-    collection = chroma_client.get_collection(
-        name=COLLECTION_NAME
-    )
+    try:
 
-    return collection
+        collection = chroma_client.get_collection(
+            name=COLLECTION_NAME
+        )
+
+        print("Loaded existing vector database.")
+
+        return collection
+
+    except Exception:
+
+        print(
+            "Collection not found. "
+            "Creating vector database..."
+        )
+
+        docs = load_documents()
+
+        chunks = chunk_documents(docs)
+
+        collection = create_vector_db(chunks)
+
+        return collection
+
 
 def retrieve_documents(query, collection, top_k=TOP_K_RESULTS):
+    """
+    Retrieve the most relevant document chunks
+    for a user query.
+    """
 
     query_embedding = get_embedding(query)
 
@@ -147,22 +205,6 @@ def retrieve_documents(query, collection, top_k=TOP_K_RESULTS):
 
     return results
 
-# if __name__ == "__main__":
-
-#     docs = load_documents()
-
-#     chunks = chunk_documents(docs)
-
-#     print(f"\nTotal Chunks: {len(chunks)}\n")
-
-#     for chunk in chunks[:5]:
-
-#         print("=" * 60)
-#         print("SOURCE:", chunk["source"])
-#         print("CHUNK:", chunk["chunk_index"])
-#         print()
-#         print(chunk["text"])
-#         print()
 
 if __name__ == "__main__":
 
