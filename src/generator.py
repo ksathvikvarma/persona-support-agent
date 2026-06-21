@@ -3,6 +3,8 @@ import os
 
 from google import genai
 
+from config import GENERATION_MODEL
+
 load_dotenv()
 
 client = genai.Client(
@@ -16,45 +18,45 @@ def generate_response(user_message, persona, retrieved_chunks):
     context = "\n\n".join(retrieved_chunks)
 
     prompt = f"""
-You are an AI customer support assistant.
+    You are an AI customer support assistant.
 
-Detected Persona:
-{persona}
+    Detected Persona:
+    {persona}
 
-Knowledge Base Context:
-{context}
+    Knowledge Base Context:
+    {context}
 
-Customer Question:
-{user_message}
+    Customer Question:
+    {user_message}
 
-Instructions:
-- Answer ONLY using the provided knowledge base context.
-- Do not make up information.
-- Adapt the tone based on the persona.
+    Instructions:
+    - Answer ONLY using the provided knowledge base context.
+    - Do not make up information.
+    - Adapt the tone based on the persona.
 
-Persona Styles:
+    Persona Styles:
 
-Technical Expert:
-- Detailed
-- Technical
-- Step-by-step explanation
+    Technical Expert:
+    - Detailed
+    - Technical
+    - Step-by-step explanation
 
-Frustrated User:
-- Empathetic
-- Reassuring
-- Professional
-- Avoid excessive emotional language
+    Frustrated User:
+    - Empathetic
+    - Reassuring
+    - Professional
+    - Avoid excessive emotional language
 
-Business Executive:
-- Concise
-- Business-focused
-- Minimal technical jargon
+    Business Executive:
+    - Concise
+    - Business-focused
+    - Minimal technical jargon
 
-Generate the final response.
-"""
+    Generate the final response.
+    """
 
     response = client.models.generate_content(
-        model="gemini-2.5-flash",
+        model=GENERATION_MODEL,
         contents=prompt
     )
 

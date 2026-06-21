@@ -6,6 +6,9 @@ from google import genai
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from pypdf import PdfReader
 
+from config import (CHUNK_SIZE, CHUNK_OVERLAP,COLLECTION_NAME,CHROMA_DB_PATH,TOP_K_RESULTS,EMBEDDING_MODEL)
+    
+
 def load_documents(data_folder="data"):
     documents = []
 
@@ -52,8 +55,8 @@ def load_documents(data_folder="data"):
 def chunk_documents(documents):
 
     splitter = RecursiveCharacterTextSplitter(
-        chunk_size=300,
-        chunk_overlap=50
+        chunk_size=CHUNK_SIZE,
+        chunk_overlap=CHUNK_OVERLAP
     )
 
     all_chunks = []
@@ -82,7 +85,7 @@ client = genai.Client(
 
 def get_embedding(text):
     response = client.models.embed_content(
-        model="gemini-embedding-001",
+        model=EMBEDDING_MODEL,
         contents=text
     )
 
@@ -91,16 +94,16 @@ def get_embedding(text):
 def create_vector_db(chunks):
 
     chroma_client = chromadb.PersistentClient(
-        path="chroma_db"
+        path=CHROMA_DB_PATH
     )
 
     try:
-        chroma_client.delete_collection("support_kb")
+        chroma_client.delete_collection(COLLECTION_NAME)
     except:
         pass
 
     collection = chroma_client.get_or_create_collection(
-        name="support_kb"
+        name=COLLECTION_NAME
     )
 
     for i, chunk in enumerate(chunks):
@@ -124,16 +127,16 @@ def create_vector_db(chunks):
 def get_collection():
 
     chroma_client = chromadb.PersistentClient(
-        path="chroma_db"
+        path=CHROMA_DB_PATH
     )
 
     collection = chroma_client.get_collection(
-        name="support_kb"
+        name=COLLECTION_NAME
     )
 
     return collection
 
-def retrieve_documents(query, collection, top_k=3):
+def retrieve_documents(query, collection, top_k=TOP_K_RESULTS):
 
     query_embedding = get_embedding(query)
 

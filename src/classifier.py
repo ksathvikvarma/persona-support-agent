@@ -4,6 +4,7 @@ import json
 from google import genai
 from google.genai import types
 
+from config import GENERATION_MODEL
 
 load_dotenv()
 
@@ -68,7 +69,7 @@ Customer Message:
 
     try:
         response = client.models.generate_content(
-            model="gemini-2.5-flash",
+            model=GENERATION_MODEL,
             contents=prompt,
             config=types.GenerateContentConfig(
                 response_mime_type="application/json",
