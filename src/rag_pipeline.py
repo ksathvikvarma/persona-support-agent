@@ -6,7 +6,7 @@ from google import genai
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from pypdf import PdfReader
 
-from config import (
+from src.config import (
     CHUNK_SIZE,
     CHUNK_OVERLAP,
     COLLECTION_NAME,

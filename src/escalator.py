@@ -1,4 +1,4 @@
-from config import ESCALATION_KEYWORDS
+from src.config import ESCALATION_KEYWORDS
 
 def should_escalate(
     user_message,

@@ -4,7 +4,7 @@ import json
 from google import genai
 from google.genai import types
 
-from config import GENERATION_MODEL
+from src.config import GENERATION_MODEL
 
 load_dotenv()
 

@@ -3,7 +3,7 @@ import os
 
 from google import genai
 
-from config import GENERATION_MODEL
+from src.config import GENERATION_MODEL
 
 load_dotenv()
 

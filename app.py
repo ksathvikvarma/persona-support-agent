@@ -1,11 +1,11 @@
 import json
 
-from classifier import classify_persona
-from generator import generate_response
-from escalator import should_escalate
-from handoff import generate_handoff_summary
+from src.classifier import classify_persona
+from src.generator import generate_response
+from src.escalator import should_escalate
+from src.handoff import generate_handoff_summary
 
-from rag_pipeline import (
+from src.rag_pipeline import (
     get_collection,
     retrieve_documents
 )
