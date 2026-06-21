@@ -121,6 +121,18 @@ def create_vector_db(chunks):
 
     return collection
 
+def get_collection():
+
+    chroma_client = chromadb.PersistentClient(
+        path="chroma_db"
+    )
+
+    collection = chroma_client.get_collection(
+        name="support_kb"
+    )
+
+    return collection
+
 def retrieve_documents(query, collection, top_k=3):
 
     query_embedding = get_embedding(query)
