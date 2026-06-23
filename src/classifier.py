@@ -81,6 +81,9 @@ Customer Message:
         return json.loads(response.text)
 
     except Exception as e:
+
+        print("CLASSIFIER ERROR:", e)
+
         return {
             "persona": "Unknown",
             "confidence": 0.0,

@@ -72,6 +72,8 @@ def generate_response(user_message, persona, retrieved_chunks):
 
     except Exception as e:
 
+        print("GENERATOR ERROR:", e)
+
         if "429" in str(e):
             return (
                 "The AI service has reached its usage limit. "
