@@ -84,7 +84,7 @@ Customer Message:
         return {
             "persona": "Unknown",
             "confidence": 0.0,
-            "reasoning": f"Classification failed: {str(e)}"
+            "reasoning": "AI classification service temporarily unavailable."
         }
 
 

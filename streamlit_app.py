@@ -25,7 +25,11 @@ st.write(
 if "conversation_history" not in st.session_state:
     st.session_state.conversation_history = []
 
-collection = get_collection()
+@st.cache_resource
+def load_collection():
+    return get_collection()
+
+collection = load_collection()
 
 user_message = st.text_area(
     "Enter your question",
