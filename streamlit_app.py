@@ -63,7 +63,25 @@ if st.button("Submit"):
         )
 
         st.subheader("Detected Persona")
-        st.info(persona)
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.metric(
+                "Persona",
+                persona
+            )
+
+        with col2:
+            st.metric(
+                "Confidence",
+                f"{persona_result['confidence']:.0%}"
+            )
+
+        with st.expander("Classification Reasoning"):
+            st.write(
+                persona_result["reasoning"]
+            )
 
         st.subheader("Sources")
 

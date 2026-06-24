@@ -1,4 +1,5 @@
 import os
+import time
 
 import chromadb
 from dotenv import load_dotenv
@@ -12,7 +13,9 @@ from src.config import (
     COLLECTION_NAME,
     CHROMA_DB_PATH,
     TOP_K_RESULTS,
-    EMBEDDING_MODEL
+    EMBEDDING_MODEL,
+    GEMINI_MAX_RETRIES,
+    GEMINI_RETRY_BASE_DELAY
 )
 
 
@@ -108,12 +111,39 @@ def get_embedding(text):
     using the Gemini embedding model.
     """
 
-    response = client.models.embed_content(
-        model=EMBEDDING_MODEL,
-        contents=text
-    )
+    for attempt in range(GEMINI_MAX_RETRIES):
 
-    return response.embeddings[0].values
+        try:
+
+            response = client.models.embed_content(
+                model=EMBEDDING_MODEL,
+                contents=text
+            )
+
+            return response.embeddings[0].values
+
+        except Exception as e:
+
+            if (
+                "429" in str(e)
+                or "503" in str(e)
+            ) and attempt < GEMINI_MAX_RETRIES - 1:
+
+                wait_time = (
+                    GEMINI_RETRY_BASE_DELAY
+                    * (2 ** attempt)
+                )
+
+                print(
+                    f"Retrying embedding in "
+                    f"{wait_time} seconds..."
+                )
+
+                time.sleep(wait_time)
+
+                continue
+
+            raise
 
 
 def create_vector_db(chunks):

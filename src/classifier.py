@@ -1,10 +1,15 @@
 from dotenv import load_dotenv
 import os
 import json
+import time
 from google import genai
 from google.genai import types
 
-from src.config import GENERATION_MODEL
+from src.config import (
+    GENERATION_MODEL,
+    GEMINI_MAX_RETRIES,
+    GEMINI_RETRY_BASE_DELAY
+)
 
 load_dotenv()
 
@@ -67,28 +72,44 @@ Customer Message:
 {user_message}
 """
 
-    try:
-        response = client.models.generate_content(
-            model=GENERATION_MODEL,
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json",
-                response_schema=RESPONSE_SCHEMA ,
-                temperature=0.1
+    for attempt in range(GEMINI_MAX_RETRIES):
+
+        try:
+
+            response = client.models.generate_content(
+                model=GENERATION_MODEL,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    response_schema=RESPONSE_SCHEMA,
+                    temperature=0.1
+                )
             )
-        )
 
-        return json.loads(response.text)
+            return json.loads(response.text)
 
-    except Exception as e:
+        except Exception as e:
 
-        print("CLASSIFIER ERROR:", e)
+            if (
+                "429" in str(e)
+                or "503" in str(e)
+            ) and attempt < GEMINI_MAX_RETRIES - 1:
+                
+                wait_time = (
+                    GEMINI_RETRY_BASE_DELAY
+                    * (2 ** attempt)
+                )
 
-        return {
-            "persona": "Unknown",
-            "confidence": 0.0,
-            "reasoning": "AI classification service temporarily unavailable."
-        }
+                time.sleep(wait_time)
+                continue
+
+            print("CLASSIFIER ERROR:", e)
+
+            return {
+                "persona": "Unknown",
+                "confidence": 0.0,
+                "reasoning": "AI classification service temporarily unavailable."
+            }
 
 
 if __name__ == "__main__":

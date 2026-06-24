@@ -1,9 +1,14 @@
 from dotenv import load_dotenv
 import os
+import time
 
 from google import genai
 
-from src.config import GENERATION_MODEL
+from src.config import (
+    GENERATION_MODEL,
+    GEMINI_MAX_RETRIES,
+    GEMINI_RETRY_BASE_DELAY
+)
 
 load_dotenv()
 
@@ -62,29 +67,49 @@ def generate_response(user_message, persona, retrieved_chunks):
     Generate the final response.
     """
 
-    try:
-        response = client.models.generate_content(
-            model=GENERATION_MODEL,
-            contents=prompt
-        )
+    for attempt in range(GEMINI_MAX_RETRIES):
 
-        return response.text
+        try:
 
-    except Exception as e:
-
-        print("GENERATOR ERROR:", e)
-
-        if "429" in str(e):
-            return (
-                "The AI service has reached its usage limit. "
-                "Please try again later."
+            response = client.models.generate_content(
+                model=GENERATION_MODEL,
+                contents=prompt
             )
 
-        return (
-            "Unable to generate a response at this time."
-        )
+            return response.text
 
+        except Exception as e:
 
+            if (
+                "429" in str(e)
+                or "503" in str(e)
+            ) and attempt < GEMINI_MAX_RETRIES - 1:
+
+                wait_time = (
+                    GEMINI_RETRY_BASE_DELAY
+                    * (2 ** attempt)
+                )
+
+                print(
+                    f"Retrying generator in "
+                    f"{wait_time} seconds..."
+                )
+
+                time.sleep(wait_time)
+
+                continue
+
+            print("GENERATOR ERROR:", e)
+
+            if "429" in str(e):
+                return (
+                    "The AI service has reached its usage limit. "
+                    "Please try again later."
+                )
+
+            return (
+                "Unable to generate a response at this time."
+            )
 if __name__ == "__main__":
 
     retrieved_chunks = [
