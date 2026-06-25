@@ -89,6 +89,7 @@ Automatically escalates:
 
 Generates structured summaries containing:
 
+* Escalation timestamp
 * Detected persona
 * User issue
 * Conversation history

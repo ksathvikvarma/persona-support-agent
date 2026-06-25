@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 def generate_handoff_summary(
     persona,
     user_message,
@@ -11,6 +13,7 @@ def generate_handoff_summary(
     """
 
     summary = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "persona": persona,
         "issue": user_message,
         "conversation_history": conversation_history,
